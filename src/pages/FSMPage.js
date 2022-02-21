@@ -1,32 +1,38 @@
-import { useEffect, useReducer, useRef } from "react";
 import StateMachine from "javascript-state-machine";
+import { useReducer, useRef } from "react";
 
 const defaultState = {
-  init: "liquid",
+  // 初始的状态
+  init: "solid",
+  // 状态转移函数，转移函数名称、转移前的状态、转移后的状态
   transitions: [
     { name: "melt", from: "solid", to: "liquid" },
     { name: "freeze", from: "liquid", to: "solid" },
     { name: "vaporize", from: "liquid", to: "gas" },
     { name: "condense", from: "gas", to: "liquid" },
   ],
+  // observer 监听函数
   methods: {
     onMelt: function () {
-      console.log("I melted");
+      console.log("I melted我化了");
     },
     onFreeze: function () {
-      console.log("I froze");
+      console.log("I froze 我冻着了");
     },
     onVaporize: function () {
-      console.log("I vaporized");
+      console.log("I vaporized 我蒸发了");
     },
     onCondense: function () {
-      console.log("I condensed");
+      console.log("I condensed 我冷凝了");
     },
   },
 };
 
-function useFsm() {
-  const fsmRef = useRef(null);
+// const fsm = new StateMachine(defaultState);
+
+function useFSM() {
+  const fsmRef = useRef();
+
   if (!fsmRef.current) {
     fsmRef.current = new StateMachine(defaultState);
   }
@@ -34,22 +40,24 @@ function useFsm() {
   return [fsmRef.current];
 }
 
+// 闭包
+// fiber
 export default function FSMPage(props) {
-  const [fsm] = useFsm();
+  const [fsm] = useFSM();
 
-  const [, forceUpdate] = useReducer((s) => s + 1, 0);
+  const [, forceUpdate] = useReducer((x) => x + 1, 0);
 
-  console.log("fsm", fsm); //sy-log
+  //   console.log("fsm", fsm, fsm.is("solid")); //sy-log
 
-  const changeState = () => {
+  const transitionState = () => {
     switch (fsm.state) {
       case "solid":
         fsm.melt();
         break;
 
       case "liquid":
-        fsm.freeze();
-        // fsm.vaporize();
+        // fsm.freeze();
+        fsm.vaporize();
         break;
 
       case "gas":
@@ -59,13 +67,13 @@ export default function FSMPage(props) {
       default:
         break;
     }
+
     forceUpdate();
   };
-
   return (
     <div>
       <h3>FSMPage</h3>
-      <button onClick={changeState}>{fsm.state}</button>
+      <button onClick={transitionState}>{fsm.state}</button>
     </div>
   );
 }

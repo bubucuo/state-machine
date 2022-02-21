@@ -1,27 +1,30 @@
-import React, { Component } from "react";
-import store from "../store/";
+import { useEffect, useReducer } from "react";
+import store from "../store";
 
-export default class ReduxPage extends Component {
-  componentDidMount() {
-    store.subscribe(() => {
-      this.forceUpdate();
+export default function ReduxPage(props) {
+  const [, forceUpdate] = useReducer((x) => x + 1, 0);
+
+  useEffect(() => {
+    const unsubscribe = store.subscribe(() => {
+      forceUpdate();
     });
-  }
-  add = () => {
-    store.dispatch({ type: "ADD" });
-  };
-  minus = () => {
-    store.dispatch({ type: "MINUS" });
-  };
-  render() {
-    console.log("store", store); //sy-log
-    return (
-      <div>
-        <h3>ReduxPage</h3>
-        <p>{store.getState()}</p>
-        <button onClick={this.add}>add</button>
-        <button onClick={this.minus}>minus</button>
-      </div>
-    );
-  }
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  return (
+    <div>
+      <h3>ReduxPage</h3>
+      <button
+        onClick={() => {
+          store.dispatch({ type: "ADD" });
+          //   forceUpdate();
+        }}
+      >
+        {store.getState()}
+      </button>
+    </div>
+  );
 }
